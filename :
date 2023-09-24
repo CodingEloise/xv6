@@ -1,0 +1,37 @@
+#include "../kernel/types.h"
+#include "./user.h"
+
+#define MAX_SIZE 16
+
+int main(int argc, const char *argv[]){
+    int pid;
+    int fd_ftc[2];
+    int fd_ctf[2];
+    pipe(fd_ftc);
+    pipe(fd_ctf);
+
+    pid = fork();
+    if(pid==0){
+        close(fd_ftc[1]);
+	close(fd_ctf[0]);
+	
+	char buf[MAX_SIZE];
+	if(read(fd_ftc[0],buf,1)==1){
+		printf("%d: received ping\n",getpid());
+	}
+	write(fd_ctf[1],"g",1);
+	exit(0);
+    }
+    else{
+        close(fd_ftc[0]);
+	close(fd_ctf[1]);
+	
+	write(fd_ftc[1],"g",1);
+
+	char buf[MAX_SIZE];
+	if(read(fd_ctf[0],buf,1)==1){
+		printf("%d: received pong\n",getpid());
+	}
+	exit(0);
+    }
+}

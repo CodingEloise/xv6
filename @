@@ -339,7 +339,7 @@ grade:
 	./grade-lab-$(LAB) $(GRADEFLAGS)
 
 gdb:
-	riscv64-unknown-elf-gdb kernel/kernel
+riscv64-unknown-elf-gdb kernel/kernel
 
 ##
 ## FOR web handin

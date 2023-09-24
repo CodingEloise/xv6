@@ -1,0 +1,64 @@
+//prime
+#include "kernel/types.h"
+#include "kernel/stat.h"
+#include "user/user.h"
+
+int prime(int fd);
+
+int
+main(int argc, char const *argv[])
+{
+    int pfd[2];
+    pipe(pfd);
+
+    int pid;
+    pid = fork();
+    if(pid==0)
+    {
+        close(pfd[1]);
+        prime(pfd[0]);
+        exit(0);
+    }
+    else
+    {
+        close(pfd[0]);
+        int i;
+        for(i=2; i<36; i++)
+	{
+            write(pfd[1], &i, sizeof(i));
+        }
+        close(pfd[1]);
+	wait(0);
+	exit(0);
+    }
+}
+
+int prime(int fd){
+    int base;
+
+    if(read(fd, &base, sizeof(base))==0){
+        exit(0);
+    }
+    printf("prime %d/n", base);
+
+    int p[2];
+    pipe(p);
+    if(fork()==0){
+        close(p[1]);
+        prime(p[0]);
+    }
+    else{
+        close(p[0]);
+        int n;
+        int eof;
+        do{
+            eof = read(fd, &n, sizeof(int));
+            if(n%base!=0){
+                write(p[1], &n, sizeof(int));
+            }
+        }while(eof);
+        close(p[1]);
+    }
+    wait(0);
+    exit(0);
+}
